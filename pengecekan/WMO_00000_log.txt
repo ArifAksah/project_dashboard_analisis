@@ -1,0 +1,2 @@
+[CLOUD_BASE_M_H] di luar batas: sebelumnya=8000.0, sesudah=9999 (timestamp: 2013-03-01 09:00:00+00:00)
+[CLOUD_PEAK_M] di luar batas: sebelumnya=10.0, sesudah=9999 (timestamp: 2013-02-19 00:00:00+00:00)

@@ -1,0 +1,2 @@
+[PRESSURE_TEMP_C] di luar batas: sebelumnya=0.0, sesudah=9999 (timestamp: 2018-02-13 13:00:00+00:00)
+[TEMP_MAX_C_TXTXTX] di luar batas: sebelumnya=0.0, sesudah=9999 (timestamp: 2018-02-13 13:00:00+00:00)

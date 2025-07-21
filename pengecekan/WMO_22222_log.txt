@@ -1,0 +1,2 @@
+[CLOUD_BASE_M_H] di luar batas: sebelumnya=6000.0, sesudah=9999 (timestamp: 2015-08-23 12:00:00+00:00)
+[CLOUD_HIGH_HEIGHT_M] di luar batas: sebelumnya=0.0, sesudah=9999 (timestamp: 2015-08-24 09:00:00+00:00)
