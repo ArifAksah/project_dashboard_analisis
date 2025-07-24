@@ -1,0 +1,2 @@
+[CLOUD_PEAK_M] di luar batas: sebelumnya=28.0, sesudah=9999 (timestamp: 2013-10-21 03:00:00+00:00)
+[TEMP_MIN_C_TNTNTN] di luar batas: sebelumnya=0.0, sesudah=9999 (timestamp: 2015-08-27 00:00:00+00:00)

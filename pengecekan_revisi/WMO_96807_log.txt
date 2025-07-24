@@ -1,0 +1,6 @@
+[VISIBILITY_VV] disesuaikan: sebelumnya=63.0, sesudah=13 (timestamp: 2021-01-25 06:00:00+00:00)
+[VISIBILITY_VV] di luar batas: sebelumnya=90.0, sesudah=9999 (timestamp: 2018-09-09 00:00:00+00:00)
+[VISIBILITY_VV] di luar batas: sebelumnya=81.0, sesudah=9999 (timestamp: 2018-09-28 00:00:00+00:00)
+[VISIBILITY_VV] di luar batas: sebelumnya=87.0, sesudah=9999 (timestamp: 2019-03-07 12:00:00+00:00)
+[PRESSURE_TEND_24H_MB_PPP] di luar batas: sebelumnya=22.8, sesudah=9999 (timestamp: 2019-03-03 12:00:00+00:00)
+[CLOUD_BASE_2_M_H] di luar batas: sebelumnya=3000.0, sesudah=9999 (timestamp: 1970-01-08 02:00:00+00:00)
