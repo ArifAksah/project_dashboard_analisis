@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import numpy as np # ### REVISI: Menambahkan numpy untuk menangani NaN
+import numpy as np
 import re
 import os
 import glob
@@ -121,15 +121,15 @@ tab_main, tab_dist, tab_trend_monthly, tab_trend_yearly, tab_phase2, tab_raw = s
     "📊 Distribusi", 
     "📈 Tren Bulanan", 
     "📉 Tren Tahunan", 
-    "🔍 Analisis Lanjutan ",
+    "🔍 Analisis Lanjutan",
     "📋 Data Mentah"
 ])
 
 with st.sidebar:
     st.header("1. Konfigurasi Analisis")
-    folder_path_phase1 = st.text_input("Path Folder Log Awal :", "pengecekan_revisi")
+    folder_path_phase1 = st.text_input("Path Folder Log Awal (Phase 1):", "pengecekan_revisi")
 
-    if st.button("🚀 Mulai Analisis "):
+    if st.button("🚀 Mulai Analisis Phase 1"):
         if not os.path.isdir(folder_path_phase1):
             st.error(f"Error: Folder '{folder_path_phase1}' tidak ditemukan.")
         else:
@@ -139,7 +139,7 @@ with st.sidebar:
                     st.error(f"Tidak ada file log valid (*_log.txt) ditemukan di '{folder_path_phase1}'.")
                 else:
                     st.session_state['data'] = df_combined
-                    st.success(f"Analisis  selesai! Ditemukan {len(st.session_state['data'])} temuan.")
+                    st.success(f"Analisis Phase 1 selesai! Ditemukan {len(st.session_state['data'])} temuan.")
                     st.rerun()
 
 if 'data' in st.session_state:
@@ -167,10 +167,10 @@ if 'data' in st.session_state:
         (df['timestamp'].dt.date >= start_date) &
         (df['timestamp'].dt.date <= end_date)
     ]
-    st.sidebar.info(f"Menampilkan **{len(df_filtered)}** dari total **{len(df)}** temuan Phase 1.")
+    st.sidebar.info(f"Menampilkan **{len(df_filtered)}** dari total **{len(df)}** temuan.")
 
     with tab_main:
-        st.header("Ringkasan & Statistik ")
+        st.header("Ringkasan & Statistik")
         col1, col2, col3 = st.columns([1, 1, 2])
         with col1:
             st.metric("Total Temuan", f"{len(df_filtered):,}")
@@ -184,7 +184,7 @@ if 'data' in st.session_state:
             st.dataframe(param_counts, use_container_width=True)
 
     with tab_dist:
-        st.header("Distribusi Temuan ")
+        st.header("Distribusi Temuan")
         if not df_filtered.empty:
             st.subheader("Distribusi Temuan per Variabel")
             var_counts = df_filtered['variabel'].value_counts().reset_index()
@@ -239,12 +239,12 @@ if 'data' in st.session_state:
             st.warning("Tidak ada variabel yang tersedia untuk dianalisis berdasarkan filter Anda.")
 
     with tab_raw:
-        st.header("Detail Data Mentah ")
+        st.header("Detail Data Mentah")
         st.dataframe(df_filtered)
 
 with tab_phase2:
-    st.header("🔍 Analisis lanjutan untuk tindak lanjut perbaikan data")
-    st.markdown("Tab ini menganalisis file CSV dari proses tindak lanjut perbaikan data untuk melihat status setiap data yang bermasalah.")
+    st.header("🔍 Analisis Lanjutan untuk Tindak Lanjut Perbaikan Data")
+    st.markdown("Tab ini menganalisis file CSV dari proses perbaikan data untuk melihat status setiap data yang bermasalah.")
     
     with st.expander("ℹ️ Klik di sini untuk melihat penjelasan nilai 'flag'"):
         st.markdown("""
@@ -254,9 +254,9 @@ with tab_phase2:
         - **`flag = 2`**: Nilai berubah. Nilai baru diambil dari pengecekan alternatif 2.
         """)
 
-    folder_path_phase2 = st.text_input("Masukkan path ke folder  (CSV):", "phase_2_logs")
+    folder_path_phase2 = st.text_input("Masukkan path ke folder Analisis Lanjutan (CSV):", "phase_2_logs")
 
-    if st.button("📊 Jalankan Analisis "):
+    if st.button("📊 Jalankan Analisis Lanjutan"):
         if not os.path.isdir(folder_path_phase2):
             st.error(f"Error: Folder '{folder_path_phase2}' tidak ditemukan.")
         else:
@@ -266,21 +266,21 @@ with tab_phase2:
                     st.error(f"Tidak ada data valid yang dapat dimuat dari folder '{folder_path_phase2}'.")
                 else:
                     st.session_state['data_phase2'] = df_phase2
-                    st.success(f"Analisis  selesai! {len(df_phase2)} baris data dimuat.")
+                    st.success(f"Analisis selesai! {len(df_phase2)} baris data dimuat.")
     
     if 'data_phase2' in st.session_state:
         df_p2 = st.session_state['data_phase2']
         
         st.markdown("---")
-        st.subheader("Filter Analisis ")
+        st.subheader("Filter Analisis")
         
-        col1, col2,col3= st.columns(3)
+        col1, col2, col3 = st.columns(3)
         with col1:
             all_wmo_ids_p2 = sorted(df_p2['wmo_id'].unique().tolist())
-            selected_wmo_ids_p2 = st.multiselect("Pilih Stasiun (WMO ID) :", options=all_wmo_ids_p2, default=all_wmo_ids_p2, key="p2_wmo_filter")
+            selected_wmo_ids_p2 = st.multiselect("Pilih Stasiun (WMO ID):", options=all_wmo_ids_p2, default=all_wmo_ids_p2, key="p2_wmo_filter")
         with col2:
             all_params_p2 = sorted(df_p2['parameter'].unique().tolist())
-            selected_params_p2 = st.multiselect("Pilih Parameter :", options=all_params_p2, default=all_params_p2, key="p2_param_filter")
+            selected_params_p2 = st.multiselect("Pilih Parameter:", options=all_params_p2, default=all_params_p2, key="p2_param_filter")
         with col3:
             selected_flags = st.multiselect(
                 "Filter Berdasarkan Flag:",
@@ -292,7 +292,7 @@ with tab_phase2:
         df_p2_filtered = df_p2[
             (df_p2['wmo_id'].isin(selected_wmo_ids_p2)) &
             (df_p2['parameter'].isin(selected_params_p2)) &
-            (df_p2['flag'].isin(selected_flags)) # <-- Tambahkan baris ini
+            (df_p2['flag'].isin(selected_flags))
         ]
         
         df_problem = df_p2_filtered[df_p2_filtered['after'] == 9999].copy()
@@ -301,42 +301,57 @@ with tab_phase2:
         if total_problem == 0:
             st.info("Berdasarkan filter Anda, tidak ditemukan data dengan nilai `after = 9999`.")
         else:
-            total_salvageable = df_problem['after_45'].notna().sum()
-            total_unsalvageable = total_problem - total_salvageable
-            percentage = (total_salvageable / total_problem * 100) if total_problem > 0 else 0
-
+            df_salvageable = df_problem[df_problem['after_45'].notna()]
+            total_salvageable = len(df_salvageable)
+            
             st.markdown("---")
             st.subheader("Hasil Rekapitulasi Perbaikan Data (Berdasarkan Filter)")
             col1_recap, col2_recap, col3_recap = st.columns(3)
             col1_recap.metric("Total Data Problem (`after=9999`)", f"{total_problem:,}")
+            percentage = (total_salvageable / total_problem * 100) if total_problem > 0 else 0
             col2_recap.metric("Data Diselamatkan (via `after_45`)", f"{total_salvageable:,}", f"{percentage:.2f}% dari total problem")
-            col3_recap.metric("Data Belum Terselamatkan", f"{total_unsalvageable:,}")
+            col3_recap.metric("Data Belum Terselamatkan", f"{total_problem - total_salvageable:,}")
 
-            ### REVISI: Blok ini diubah total untuk menampilkan tabel sesuai permintaan baru ###
+            st.markdown("---")
+            st.subheader("Distribusi Data yang Berhasil Diselamatkan (via RAW_ME45)")
+            if not df_salvageable.empty:
+                # Distribusi per Parameter
+                st.write("#### Berdasarkan Parameter")
+                salvaged_counts = df_salvageable['parameter'].value_counts().reset_index()
+                salvaged_counts.columns = ['parameter', 'jumlah']
+                chart_salvaged_dist = alt.Chart(salvaged_counts).mark_bar(color='#28a745').encode(
+                    x=alt.X('jumlah:Q', title='Jumlah Data Berhasil Diselamatkan'),
+                    y=alt.Y('parameter:N', title='Nama Parameter', sort='-x'),
+                    tooltip=['parameter', 'jumlah']
+                ).interactive()
+                st.altair_chart(chart_salvaged_dist, use_container_width=True)
+
+                ### REVISI BARU (2): Menambahkan grafik distribusi stasiun ###
+                st.write("#### Berdasarkan Stasiun")
+                station_salvaged_counts = df_salvageable.groupby(['wmo_id', 'parameter']).size().reset_index(name='jumlah')
+                
+                chart_station_dist = alt.Chart(station_salvaged_counts).mark_bar().encode(
+                    y=alt.Y('wmo_id:N', title='WMO ID Stasiun', sort=alt.EncodingSortField(field="total_salvaged", op="sum", order="descending")),
+                    x=alt.X('sum(jumlah):Q', title='Jumlah Data Diselamatkan'),
+                    color=alt.Color('parameter:N', title='Parameter'),
+                    tooltip=['wmo_id', 'parameter', 'jumlah']
+                ).transform_joinaggregate(
+                    total_salvaged='sum(jumlah)',
+                    groupby=['wmo_id']
+                ).interactive()
+                st.altair_chart(chart_station_dist, use_container_width=True)
+                ### AKHIR REVISI BARU (2) ###
+
+            else:
+                st.info("Tidak ada data yang berhasil diselamatkan menggunakan RAW_ME45 berdasarkan filter Anda.")
+
             st.markdown("---")
             st.subheader("Detail Data Problem dan Aksi Perbaikan")
             st.markdown("Tabel ini menampilkan semua data yang bermasalah (`after = 9999`) dan hasil dari pengecekan nilai alternatif.")
-
-            # Buat salinan untuk menghindari SettingWithCopyWarning
             df_display = df_problem.copy()
+            df_display['Nilai Setelah Aksi Alternatif 1'] = np.where(df_display['flag'] == 1, df_display['after_45'], '-')
+            df_display['Nilai Setelah Aksi Alternatif 2'] = np.where(df_display['flag'] == 2, df_display['after_alt_2'], '-')
 
-            # 1. Tambahkan kolom 'Nilai Setelah Aksi Alternatif 1'
-            # Jika flag=1, isi dengan nilai after_45, selain itu isi dengan "-"
-            df_display['Nilai Setelah Aksi Alternatif 1'] = np.where(
-                df_display['flag'] == 1, 
-                df_display['after_45'], 
-                '-'
-            )
-
-            # 2. Tambahkan kolom 'Nilai Setelah Aksi Alternatif 2'
-            # Jika flag=2, isi dengan nilai after_alt_2, selain itu isi dengan "-"
-            df_display['Nilai Setelah Aksi Alternatif 2'] = np.where(
-                df_display['flag'] == 2, 
-                df_display['after_alt_2'], 
-                '-'
-            )
-
-            # 3. Pilih dan ganti nama kolom untuk ditampilkan
             df_display_final = df_display[[
                 'wmo_id', 'parameter', 'timestamp', 'before', 'after_45',
                 'Nilai Setelah Aksi Alternatif 1', 'Nilai Setelah Aksi Alternatif 2', 'flag'
@@ -345,8 +360,7 @@ with tab_phase2:
                 'after_45': 'RAW_ME45'
             })
             
-            # Tampilkan dataframe yang sudah rapi
             st.dataframe(df_display_final, use_container_width=True)
 
 if 'data' not in st.session_state and 'data_phase2' not in st.session_state:
-    st.info("Selamat datang! Silakan pilih folder log dan klik tombol analisis di sidebar untuk memulai.")
+    st.info("Selamat datang! Silakan pilih folder log dan klik tombol analisis untuk memulai.")
