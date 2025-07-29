@@ -284,8 +284,8 @@ with tab_phase2:
         with col3:
             selected_flags = st.multiselect(
                 "Filter Berdasarkan Flag:",
-                options=[0, 1, 2],
-                default=[0, 1, 2],
+                options=[0, 1, 2 , 3],
+                default=[0, 1, 2, 3],
                 key="p2_flag_filter"
             )
 
