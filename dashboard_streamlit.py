@@ -254,7 +254,7 @@ with tab_phase2:
         - **`flag = 2`**: Nilai berubah. Nilai baru diambil dari pengecekan alternatif 2.
         """)
 
-    folder_path_phase2 = st.text_input("Masukkan path ke folder Analisis Lanjutan (CSV):", "phase_2_logs")
+    folder_path_phase2 = st.text_input("Masukkan path ke folder Analisis Lanjutan (CSV):", "phase_2_log")
 
     if st.button("📊 Jalankan Analisis Lanjutan"):
         if not os.path.isdir(folder_path_phase2):
