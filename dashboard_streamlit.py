@@ -169,6 +169,7 @@ if 'data' in st.session_state:
     ]
     st.sidebar.info(f"Menampilkan **{len(df_filtered)}** dari total **{len(df)}** temuan.")
 
+    # Bagian Tab lainnya (Ringkasan, Distribusi, dll.) tetap sama
     with tab_main:
         st.header("Ringkasan & Statistik")
         col1, col2, col3 = st.columns([1, 1, 2])
@@ -189,19 +190,13 @@ if 'data' in st.session_state:
             st.subheader("Distribusi Temuan per Variabel")
             var_counts = df_filtered['variabel'].value_counts().reset_index()
             var_counts.columns = ['variabel', 'jumlah']
-            chart_bar_var = alt.Chart(var_counts).mark_bar().encode(
-                x=alt.X('jumlah:Q', title='Jumlah Temuan'),
-                y=alt.Y('variabel:N', title='Nama Variabel', sort='-x')
-            ).interactive()
+            chart_bar_var = alt.Chart(var_counts).mark_bar().encode(x=alt.X('jumlah:Q', title='Jumlah Temuan'), y=alt.Y('variabel:N', title='Nama Variabel', sort='-x')).interactive()
             st.altair_chart(chart_bar_var, use_container_width=True)
 
             st.subheader("Distribusi Temuan per Stasiun (WMO ID)")
             wmo_counts = df_filtered['wmo_id'].value_counts().reset_index()
             wmo_counts.columns = ['wmo_id', 'jumlah']
-            chart_bar_wmo = alt.Chart(wmo_counts).mark_bar(color='orange').encode(
-                x=alt.X('jumlah:Q', title='Jumlah Temuan'),
-                y=alt.Y('wmo_id:N', title='WMO ID', sort='-x')
-            ).interactive()
+            chart_bar_wmo = alt.Chart(wmo_counts).mark_bar(color='orange').encode(x=alt.X('jumlah:Q', title='Jumlah Temuan'), y=alt.Y('wmo_id:N', title='WMO ID', sort='-x')).interactive()
             st.altair_chart(chart_bar_wmo, use_container_width=True)
         else:
             st.warning("Tidak ada data untuk ditampilkan berdasarkan filter saat ini.")
@@ -210,11 +205,7 @@ if 'data' in st.session_state:
         st.header("Tren Temuan Berdasarkan Waktu (Bulanan)")
         if not df_filtered.empty:
             errors_over_time = df_filtered.set_index('timestamp').resample('M').size().reset_index(name='jumlah_temuan')
-            chart_line = alt.Chart(errors_over_time).mark_line(point=True).encode(
-                x=alt.X('yearmonth(timestamp):T', title='Bulan'),
-                y=alt.Y('jumlah_temuan:Q', title='Jumlah Temuan'),
-                tooltip=['yearmonth(timestamp)', 'jumlah_temuan']
-            ).interactive()
+            chart_line = alt.Chart(errors_over_time).mark_line(point=True).encode(x=alt.X('yearmonth(timestamp):T', title='Bulan'), y=alt.Y('jumlah_temuan:Q', title='Jumlah Temuan'), tooltip=['yearmonth(timestamp)', 'jumlah_temuan']).interactive()
             st.altair_chart(chart_line, use_container_width=True)
         else:
             st.warning("Tidak ada data untuk ditampilkan berdasarkan filter saat ini.")
@@ -222,18 +213,11 @@ if 'data' in st.session_state:
     with tab_trend_yearly:
         st.header("Analisis Tren Tahunan untuk Parameter Spesifik")
         available_vars = sorted(df_filtered['variabel'].unique().tolist())
-        
         if available_vars:
             param_to_analyze = st.selectbox("Pilih satu parameter untuk dianalisis:", options=available_vars)
             df_param_trend = df_filtered[df_filtered['variabel'] == param_to_analyze]
             trend_data = df_param_trend.groupby([df_param_trend['timestamp'].dt.year.rename('tahun'), 'wmo_id']).size().reset_index(name='jumlah_temuan')
-            
-            chart_trend_yearly = alt.Chart(trend_data).mark_line(point=True).encode(
-                x=alt.X('tahun:O', title='Tahun', axis=alt.Axis(labelAngle=0)),
-                y=alt.Y('jumlah_temuan:Q', title=f'Jumlah Temuan ({param_to_analyze})'),
-                color=alt.Color('wmo_id:N', title='WMO ID'),
-                tooltip=['tahun', 'wmo_id', 'jumlah_temuan']
-            ).interactive()
+            chart_trend_yearly = alt.Chart(trend_data).mark_line(point=True).encode(x=alt.X('tahun:O', title='Tahun', axis=alt.Axis(labelAngle=0)), y=alt.Y('jumlah_temuan:Q', title=f'Jumlah Temuan ({param_to_analyze})'), color=alt.Color('wmo_id:N', title='WMO ID'), tooltip=['tahun', 'wmo_id', 'jumlah_temuan']).interactive()
             st.altair_chart(chart_trend_yearly, use_container_width=True)
         else:
             st.warning("Tidak ada variabel yang tersedia untuk dianalisis berdasarkan filter Anda.")
@@ -242,6 +226,7 @@ if 'data' in st.session_state:
         st.header("Detail Data Mentah")
         st.dataframe(df_filtered)
 
+### REVISI UTAMA: Perubahan signifikan pada Tab Analisis Lanjutan ###
 with tab_phase2:
     st.header("🔍 Analisis Lanjutan untuk Tindak Lanjut Perbaikan Data")
     st.markdown("Tab ini menganalisis file CSV dari proses perbaikan data untuk melihat status setiap data yang bermasalah.")
@@ -252,9 +237,10 @@ with tab_phase2:
         - **`flag = 0`**: Tidak ada perubahan nilai. Nilai tetap sama setelah pengecekan alternatif.
         - **`flag = 1`**: Nilai berubah. Nilai baru diambil dari pengecekan alternatif 1 (**RAW_ME45**).
         - **`flag = 2`**: Nilai berubah. Nilai baru diambil dari pengecekan alternatif 2.
+        - **`flag = 3`**: Nilai di RAW_ME48 dan RAW_ME45 berbeda, tetapi nilai di RAW_ME45 null, sehingga dilakukan perhitungan lain (menggunakan alternatif 2).
         """)
 
-    folder_path_phase2 = st.text_input("Masukkan path ke folder Analisis Lanjutan (CSV):", "phase_2_log")
+    folder_path_phase2 = st.text_input("Masukkan path ke folder Analisis Lanjutan (CSV):", "analisis_lanjutan")
 
     if st.button("📊 Jalankan Analisis Lanjutan"):
         if not os.path.isdir(folder_path_phase2):
@@ -284,7 +270,7 @@ with tab_phase2:
         with col3:
             selected_flags = st.multiselect(
                 "Filter Berdasarkan Flag:",
-                options=[0, 1, 2 , 3],
+                options=[0, 1, 2, 3],
                 default=[0, 1, 2, 3],
                 key="p2_flag_filter"
             )
@@ -301,66 +287,88 @@ with tab_phase2:
         if total_problem == 0:
             st.info("Berdasarkan filter Anda, tidak ditemukan data dengan nilai `after = 9999`.")
         else:
-            df_salvageable = df_problem[df_problem['after_45'].notna()]
-            total_salvageable = len(df_salvageable)
-            
-            st.markdown("---")
-            st.subheader("Hasil Rekapitulasi Perbaikan Data (Berdasarkan Filter)")
-            col1_recap, col2_recap, col3_recap = st.columns(3)
-            col1_recap.metric("Total Data Problem (`after=9999`)", f"{total_problem:,}")
-            percentage = (total_salvageable / total_problem * 100) if total_problem > 0 else 0
-            col2_recap.metric("Data Diselamatkan (via `after_45`)", f"{total_salvageable:,}", f"{percentage:.2f}% dari total problem")
-            col3_recap.metric("Data Belum Terselamatkan", f"{total_problem - total_salvageable:,}")
+            # Membuat Sub-Tab untuk merapikan tampilan
+            sub_tab_ringkasan, sub_tab_distribusi, sub_tab_detail = st.tabs([
+                "📈 Ringkasan Status", 
+                "📊 Distribusi Data Terselamatkan", 
+                "📋 Detail Data & Aksi"
+            ])
 
-            st.markdown("---")
-            st.subheader("Distribusi Data yang Berhasil Diselamatkan (via RAW_ME45)")
-            if not df_salvageable.empty:
-                # Distribusi per Parameter
-                st.write("#### Berdasarkan Parameter")
-                salvaged_counts = df_salvageable['parameter'].value_counts().reset_index()
-                salvaged_counts.columns = ['parameter', 'jumlah']
-                chart_salvaged_dist = alt.Chart(salvaged_counts).mark_bar(color='#28a745').encode(
-                    x=alt.X('jumlah:Q', title='Jumlah Data Berhasil Diselamatkan'),
-                    y=alt.Y('parameter:N', title='Nama Parameter', sort='-x'),
-                    tooltip=['parameter', 'jumlah']
-                ).interactive()
-                st.altair_chart(chart_salvaged_dist, use_container_width=True)
-
-                ### REVISI BARU (2): Menambahkan grafik distribusi stasiun ###
-                st.write("#### Berdasarkan Stasiun")
-                station_salvaged_counts = df_salvageable.groupby(['wmo_id', 'parameter']).size().reset_index(name='jumlah')
+            with sub_tab_ringkasan:
+                st.header("Ringkasan Status Perbaikan")
+                df_salvageable = df_problem[df_problem['after_45'].notna()]
+                total_salvageable = len(df_salvageable)
                 
-                chart_station_dist = alt.Chart(station_salvaged_counts).mark_bar().encode(
-                    y=alt.Y('wmo_id:N', title='WMO ID Stasiun', sort=alt.EncodingSortField(field="total_salvaged", op="sum", order="descending")),
-                    x=alt.X('sum(jumlah):Q', title='Jumlah Data Diselamatkan'),
-                    color=alt.Color('parameter:N', title='Parameter'),
-                    tooltip=['wmo_id', 'parameter', 'jumlah']
-                ).transform_joinaggregate(
-                    total_salvaged='sum(jumlah)',
-                    groupby=['wmo_id']
+                st.subheader("Hasil Rekapitulasi Umum")
+                col1_recap, col2_recap, col3_recap = st.columns(3)
+                col1_recap.metric("Total Data Problem (`after=9999`)", f"{total_problem:,}")
+                percentage = (total_salvageable / total_problem * 100) if total_problem > 0 else 0
+                col2_recap.metric("Data Diselamatkan (via `after_45`)", f"{total_salvageable:,}", f"{percentage:.2f}% dari total problem")
+                col3_recap.metric("Data Belum Terselamatkan", f"{total_problem - total_salvageable:,}")
+
+                st.subheader("Distribusi Status Perbaikan Berdasarkan Flag")
+                flag_counts = df_problem['flag'].value_counts().reset_index()
+                flag_counts.columns = ['flag', 'jumlah']
+                flag_counts['flag'] = flag_counts['flag'].astype(str)
+
+                chart_flag_dist = alt.Chart(flag_counts).mark_bar().encode(
+                    x=alt.X('jumlah:Q', title='Jumlah Data'),
+                    y=alt.Y('flag:N', title='Flag', sort='-x'),
+                    color=alt.Color('flag:N', title='Flag', scale=alt.Scale(scheme='category10')),
+                    tooltip=['flag', 'jumlah']
+                ).properties(
+                    title='Jumlah Data untuk Setiap Kategori Flag'
                 ).interactive()
-                st.altair_chart(chart_station_dist, use_container_width=True)
-                ### AKHIR REVISI BARU (2) ###
+                st.altair_chart(chart_flag_dist, use_container_width=True)
 
-            else:
-                st.info("Tidak ada data yang berhasil diselamatkan menggunakan RAW_ME45 berdasarkan filter Anda.")
+            with sub_tab_distribusi:
+                st.header("Distribusi Data yang Berhasil Diselamatkan (via RAW_ME45)")
+                df_salvageable = df_problem[df_problem['after_45'].notna()]
 
-            st.markdown("---")
-            st.subheader("Detail Data Problem dan Aksi Perbaikan")
-            st.markdown("Tabel ini menampilkan semua data yang bermasalah (`after = 9999`) dan hasil dari pengecekan nilai alternatif.")
-            df_display = df_problem.copy()
-            df_display['Nilai Setelah Aksi Alternatif 1'] = np.where(df_display['flag'] == 1, df_display['after_45'], '-')
-            df_display['Nilai Setelah Aksi Alternatif 2'] = np.where(df_display['flag'] == 2, df_display['after_alt_2'], '-')
+                if not df_salvageable.empty:
+                    st.write("#### Berdasarkan Parameter")
+                    salvaged_counts = df_salvageable['parameter'].value_counts().reset_index()
+                    salvaged_counts.columns = ['parameter', 'jumlah']
+                    chart_salvaged_dist = alt.Chart(salvaged_counts).mark_bar(color='#28a745').encode(
+                        x=alt.X('jumlah:Q', title='Jumlah Data Berhasil Diselamatkan'),
+                        y=alt.Y('parameter:N', title='Nama Parameter', sort='-x'),
+                        tooltip=['parameter', 'jumlah']
+                    ).interactive()
+                    st.altair_chart(chart_salvaged_dist, use_container_width=True)
 
-            df_display_final = df_display[[
-                'wmo_id', 'parameter', 'timestamp', 'before', 'after_45',
-                'Nilai Setelah Aksi Alternatif 1', 'Nilai Setelah Aksi Alternatif 2', 'flag'
-            ]].rename(columns={
-                'before': 'RAW_ME48',
-                'after_45': 'RAW_ME45'
-            })
-            
-            st.dataframe(df_display_final, use_container_width=True)
+                    st.write("#### Berdasarkan Stasiun")
+                    station_salvaged_counts = df_salvageable.groupby(['wmo_id', 'parameter']).size().reset_index(name='jumlah')
+                    chart_station_dist = alt.Chart(station_salvaged_counts).mark_bar().encode(
+                        y=alt.Y('wmo_id:N', title='WMO ID Stasiun', sort=alt.EncodingSortField(field="total_salvaged", op="sum", order="descending")),
+                        x=alt.X('sum(jumlah):Q', title='Jumlah Data Diselamatkan'),
+                        color=alt.Color('parameter:N', title='Parameter'),
+                        tooltip=['wmo_id', 'parameter', 'jumlah']
+                    ).transform_joinaggregate(
+                        total_salvaged='sum(jumlah)',
+                        groupby=['wmo_id']
+                    ).interactive()
+                    st.altair_chart(chart_station_dist, use_container_width=True)
+                else:
+                    st.info("Tidak ada data yang berhasil diselamatkan menggunakan RAW_ME45 berdasarkan filter Anda.")
+
+            with sub_tab_detail:
+                st.header("Detail Data Problem dan Aksi Perbaikan")
+                st.markdown("Tabel ini menampilkan semua data yang bermasalah (`after = 9999`) dan hasil dari pengecekan nilai alternatif.")
+                df_display = df_problem.copy()
+                
+                # Logika baru untuk menangani flag 1, 2, dan 3
+                df_display['Nilai Setelah Aksi Alternatif 1'] = np.where(df_display['flag'] == 1, df_display['after_45'], '-')
+                df_display['Nilai Setelah Aksi Alternatif 2'] = np.where(df_display['flag'].isin([2, 3]), df_display['after_alt_2'], '-')
+
+                df_display_final = df_display[[
+                    'wmo_id', 'parameter', 'timestamp', 'before', 'after_45',
+                    'Nilai Setelah Aksi Alternatif 1', 'Nilai Setelah Aksi Alternatif 2', 'flag'
+                ]].rename(columns={
+                    'before': 'RAW_ME48',
+                    'after_45': 'RAW_ME45'
+                })
+                
+                st.dataframe(df_display_final, use_container_width=True)
 
 if 'data' not in st.session_state and 'data_phase2' not in st.session_state:
     st.info("Selamat datang! Silakan pilih folder log dan klik tombol analisis untuk memulai.")
